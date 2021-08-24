@@ -1,0 +1,18 @@
+version: '3.4'
+
+services:
+  novarmailscheduler:
+    container_name: novarmailscheduler
+    expose:
+      - 5000
+    ports:
+      - "5000:80"
+    build:
+      context: .
+      dockerfile: ./Web.Api/Dockerfile
+
+  mongo:
+    container_name: mongodb
+    image: mongo:4.4.7
+    expose:
+      - 27017
