@@ -44,16 +44,22 @@ namespace MailScheduler.Services
         // Static dates for now, possibly expand in the future to be set via LimeSurvey?
         private List<string> GenerateFollowupDates(DateTime surgeryDate)
         {
-            // Formatting DateTime.Now.ToString : yyyy-MM-dd
-            var followups = new List<string>();
+            var timelineDays = new int[] {
+                42,   // 6 Weeks
+                90,   // 3 Months
+                180,  // 6 Months
+                365,  // 12 Months
+                730,  // 2 Years
+                1825, // 5 Years
+                3650, // 10 Years
+            };
 
-            followups.Add(surgeryDate.AddDays(42).ToString("yyyy-MM-dd")); // 6 Weeks
-            followups.Add(surgeryDate.AddDays(90).ToString("yyyy-MM-dd")); // 3 Months
-            followups.Add(surgeryDate.AddDays(180).ToString("yyyy-MM-dd")); // 6 Months
-            followups.Add(surgeryDate.AddDays(365).ToString("yyyy-MM-dd")); // 12 Months
-            followups.Add(surgeryDate.AddDays(730).ToString("yyyy-MM-dd")); // 2 Years
-            followups.Add(surgeryDate.AddDays(1825).ToString("yyyy-MM-dd")); // 5 Years
-            followups.Add(surgeryDate.AddDays(3650).ToString("yyyy-MM-dd")); // 10 Years
+            var followups = new List<string>();
+            foreach (var day in timelineDays)
+            {
+                var date = surgeryDate.AddDays(day).ToString("yyyy-MM-dd");
+                followups.Add(date);
+            }
 
             return followups;
         }
