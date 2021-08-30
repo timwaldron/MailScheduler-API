@@ -14,6 +14,7 @@ namespace MailScheduler.Models.Dtos
         public string Email { get; set; }
         public string Token { get; set; }
         public string SurveyId { get; set; }
+        public string SurveyURL { get; set; } // TODO: Assess, may be able to build it just from token/surveyId
         public string RecalcFollowupDates { get; set; }
 
         public string CreatedAt { get; set; }

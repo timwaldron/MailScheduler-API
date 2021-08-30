@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using System;
 
 namespace MailScheduler
 {
@@ -33,6 +34,7 @@ namespace MailScheduler
 
             // Services
             services.AddScoped<ISchedulerService, SchedulerService>();
+            services.AddScoped<IMailerService, MailerService>();
 
             // Repositories
             services.AddScoped<ISchedulerRepository, SchedulerRepository>();
@@ -79,6 +81,13 @@ namespace MailScheduler
             {
                 //Authorization = new[] { }
             });
+
+            RecurringJob.AddOrUpdate(() => SendMail(), "0 10 * * *");
+        }
+
+        public void SendMail()
+        {
+            Console.WriteLine("Mail Sent!");
         }
     }
 }

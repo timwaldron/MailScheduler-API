@@ -9,5 +9,6 @@ namespace MailScheduler.Config
     {
         public string MongoConnectionString { get; set; }
         public string MongoDatabaseName { get; set; }
+        public MailSettings MailSettings { get; set; }
     }
 }
