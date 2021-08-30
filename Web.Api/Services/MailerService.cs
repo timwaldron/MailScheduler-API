@@ -33,7 +33,7 @@ namespace MailScheduler.Services
                 mail.From = new MailAddress(_settings.MailSettings.FromAddress);
                 mail.Subject = "Novar Survey";
 
-                var surveyURL = $"https://novarsurveys.lateralplains.com/index.php?r=survey/index&sid={user.SurveyId}&lang=en";
+                var surveyURL = _settings.MailSettings.BaseSurveyURL.Replace("{SID}", user.SurveyId);
 
                 mail.To.Add(user.Email);
                 string body = @"

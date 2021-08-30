@@ -12,6 +12,7 @@ namespace MailScheduler.Config
         public string SmtpServer { get; set; }
         public int Port { get; set; }
         public bool EnableSsl { get; set; }
+        public string BaseSurveyURL { get; set; }
         public string FromAddress { get; set; }
     }
 }

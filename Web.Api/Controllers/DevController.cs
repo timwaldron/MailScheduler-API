@@ -21,19 +21,8 @@ namespace MailScheduler.Controllers
         }
 
         [HttpGet("mailtest")]
-        public async Task<IActionResult> MailTest()
+        public async Task<IActionResult> MailTest([FromBody] UserScheduleDto user)
         {
-            var user = new UserScheduleDto()
-            {
-                FirstName = "Timothy",
-                LastName = "Waldron",
-                Email = "tim@waldron.im",
-                SurveyId = "377889",
-                Token = "luHLDn4SCCMvQaQ",
-
-            };
-            user.SurveyURL = $"http://localhost/limesurvey/index.php/{user.SurveyId}?token={user.Token}&newtest=Y";
-
             var mailResponse = await _service.SendMail(user);
 
             return Ok(mailResponse);
