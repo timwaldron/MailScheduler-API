@@ -20,7 +20,7 @@ namespace MailScheduler.Controllers
             _service = service;
         }
 
-        [HttpGet("mailtest")]
+        [HttpPost("mailtest")]
         public async Task<IActionResult> MailTest([FromBody] UserScheduleDto user)
         {
             var mailResponse = await _service.SendMail(user);
