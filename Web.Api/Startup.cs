@@ -47,11 +47,13 @@ namespace MailScheduler
             };
             services.AddHangfire(config =>
             {
+                var connectionString = configSection.GetSection("MongoConnectionString").Value;
+                var databaseName = configSection.GetSection("MongoDatabaseName").Value;
+                 
                 config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
                 config.UseSimpleAssemblyNameTypeSerializer();
                 config.UseRecommendedSerializerSettings();
-                config.UseMongoStorage(configSection.GetSection("MongoConnectionString").Value, "novarsurveys", new MongoStorageOptions { MigrationOptions = migrationOptions });
-
+                config.UseMongoStorage(connectionString, databaseName, new MongoStorageOptions { MigrationOptions = migrationOptions });
             });
             services.AddHangfireServer();
 
