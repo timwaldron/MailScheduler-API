@@ -21,9 +21,9 @@ namespace MailScheduler.Controllers
         }
 
         [HttpPost("mailtest")]
-        public async Task<IActionResult> MailTest([FromBody] UserScheduleDto user)
+        public IActionResult MailTest([FromBody] UserScheduleDto user)
         {
-            var mailResponse = await _service.SendMail(user);
+            var mailResponse = _service.SendMail(user);
 
             return Ok(mailResponse);
         }

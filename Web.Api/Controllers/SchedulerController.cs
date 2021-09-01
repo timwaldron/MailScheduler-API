@@ -32,6 +32,15 @@ namespace MailScheduler.Controllers
             return Ok(id);
         }
 
+        [HttpPost("init")]
+        public IActionResult InitUserSchedule([FromBody] UserScheduleDto dto)
+        {
+            var id = _service.InitUserSchedule(dto);
+            
+            // TODO: Assess if we need to return anything
+            return Ok(string.IsNullOrEmpty(id) ? "No user created" : id);
+        }
+
         [HttpGet("{surveyId}")]
         public UserScheduleDto GetScheduleByToken(string surveyId, string token)
         {

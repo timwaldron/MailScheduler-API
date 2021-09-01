@@ -46,5 +46,12 @@ namespace MailScheduler.Repositories
 
             return base.UpsertDocument(filter, entity) ?? entity.Id;
         }
+
+        public List<UserScheduleDto> GetAllSchedules()
+        {
+            var entites = base.FindAll();
+
+            return entites.Select(e => e.ToDto()).ToList();
+        }
     }
 }

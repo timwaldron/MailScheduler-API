@@ -1,4 +1,5 @@
-﻿using MailScheduler.Models.Dtos;
+﻿using MailScheduler.Models;
+using MailScheduler.Models.Dtos;
 using MailScheduler.Repositories;
 using System;
 using System.Collections.Generic;
@@ -41,6 +42,38 @@ namespace MailScheduler.Services
             return _repository.SaveUserSchedule(dto);
         }
 
+        public string InitUserSchedule(UserScheduleDto dto)
+        {
+            // Filter lookup (Email && Token && SurveyId)
+            // If user exists, return (do nothing)
+            var user = _repository.GetScheduleByToken(dto.SurveyId, dto.Token);
+
+            // Returning user, no need to create initial db entry
+            if (user != null)
+            {
+                return string.Empty;
+            }
+
+            dto.RecruitmentDate = DateTime.Now.ToString(Constants.DATETIME_FORMAT);
+
+            // If a surgery date is supplied, calculate the followup dates
+            if (!string.IsNullOrEmpty(dto.SurgeryDate))
+            {
+                var surgeryDate = DateTime.Parse(dto.SurgeryDate);
+                dto.FollowupDates = GenerateFollowupDates(surgeryDate);
+
+                // Date string that's coming in is formatted: dd.MM.yyyy, this reformats it to our style
+                dto.SurgeryDate = surgeryDate.ToString(Constants.DATETIME_FORMAT);
+            }
+
+            return _repository.SaveUserSchedule(dto);
+        }
+
+        public List<UserScheduleDto> GetAllSchedules()
+        {
+            return _repository.GetAllSchedules();
+        }
+
         // Static dates for now, possibly expand in the future to be set via LimeSurvey?
         private List<string> GenerateFollowupDates(DateTime surgeryDate)
         {
@@ -57,7 +90,7 @@ namespace MailScheduler.Services
             var followups = new List<string>();
             foreach (var day in timelineDays)
             {
-                var date = surgeryDate.AddDays(day).ToString("yyyy-MM-dd");
+                var date = surgeryDate.AddDays(day).ToString(Constants.DATETIME_FORMAT);
                 followups.Add(date);
             }
 

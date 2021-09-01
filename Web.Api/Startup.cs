@@ -82,12 +82,7 @@ namespace MailScheduler
                 //Authorization = new[] { }
             });
 
-            RecurringJob.AddOrUpdate(() => SendMail(), "0 10 * * *");
-        }
-
-        public void SendMail()
-        {
-            Console.WriteLine("Mail Sent!");
+            RecurringJob.AddOrUpdate<IMailerService>(x => x.AssessAndSendMail(), "0 10 * * *");
         }
     }
 }

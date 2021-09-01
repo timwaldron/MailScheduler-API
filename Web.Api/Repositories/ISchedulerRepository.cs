@@ -10,5 +10,6 @@ namespace MailScheduler.Repositories
     {
         UserScheduleDto GetScheduleByToken(string surveyId, string token);
         string SaveUserSchedule(UserScheduleDto dto);
+        List<UserScheduleDto> GetAllSchedules();
     }
 }

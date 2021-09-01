@@ -18,6 +18,7 @@ namespace MailScheduler.Models.Entities
         public string Email { get; set; }
         public string Token { get; set; }
         public string SurveyId { get; set; }
+        public string InjuryType { get; set; }
 
         public string CreatedAt { get; set; }
         public string UpdatedAt { get; set; }

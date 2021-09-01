@@ -42,6 +42,12 @@ namespace MailScheduler.Repositories
             return result;
         }
 
+        public List<T> FindAll()
+        {
+            var result = _items.Find(_ => true).ToList();
+            return result;
+        }
+
         // Create document if it doesn't exist, overwrite it if it does exist
         public string UpsertDocument(FilterDefinition<T> filter, T entity)
         {

@@ -1,4 +1,6 @@
-﻿using MailScheduler.Config;
+﻿using Hangfire;
+using MailScheduler.Config;
+using MailScheduler.Models;
 using MailScheduler.Models.Dtos;
 using System;
 using System.Collections.Generic;
@@ -11,13 +13,15 @@ namespace MailScheduler.Services
     public class MailerService : IMailerService
     {
         private readonly IAppSettings _settings;
+        private readonly ISchedulerService _service;
 
-        public MailerService(IAppSettings settings)
+        public MailerService(IAppSettings settings, ISchedulerService service)
         {
             _settings = settings;
+            _service = service;
         }
 
-        public async Task<string> SendMail(UserScheduleDto user)
+        public string SendMail(UserScheduleDto user)
         {
             string response = string.Empty;
 
@@ -59,7 +63,7 @@ The team at Novar Specialist Healthcare
                     .Replace("{NAME}", $"{user.FirstName} {user.LastName}")
                     .Replace("{SURVEYURL}", $"{surveyURL}");
 
-                await smtpServer.SendMailAsync(mail);
+                smtpServer.Send(mail);
             }
             catch (Exception ex)
             {
@@ -67,6 +71,34 @@ The team at Novar Specialist Healthcare
             }
 
             return response;
+        }
+
+        public void AssessAndSendMail()
+        {
+            try
+            {
+                var allSchedules = _service.GetAllSchedules();
+                var date = DateTime.Now.ToString(Constants.DATETIME_FORMAT);
+
+                // Iterate every schedule
+                foreach (var schedule in allSchedules)
+                {
+
+                    foreach (var followupDate in schedule.FollowupDates)
+                    {
+                        if (followupDate == date)
+                        {
+                            Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}] Matched scheduled survey: {schedule.FirstName} {schedule.LastName} ({schedule.Email}) for date {followupDate}.");
+                            //SendMail(schedule);
+                            break; //
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // TODO: HANDLE / IMPLEMENT THIS CORRECTLY
+            }
         }
     }
 }
