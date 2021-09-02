@@ -19,8 +19,8 @@ namespace MailScheduler.Repositories
 
         public RepositoryBase(IAppSettings settings)
         {
-            var client = new MongoClient(settings.MongoConnectionString);
-            var database = client.GetDatabase(settings.MongoDatabaseName);
+            var client = new MongoClient(settings.Database.ConnectionUrl);
+            var database = client.GetDatabase(settings.Database.Name);
 
             var conventionPack = new ConventionPack { new CamelCaseElementNameConvention() };
             ConventionRegistry.Register("camelCase", conventionPack, t => true);

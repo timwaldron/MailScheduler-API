@@ -7,8 +7,7 @@ namespace MailScheduler.Config
 {
     public class AppSettings : IAppSettings
     {
-        public string MongoConnectionString { get; set; }
-        public string MongoDatabaseName { get; set; }
+        public DatabaseSettings Database { get; set; }
         public MailSettings MailSettings { get; set; }
     }
 }

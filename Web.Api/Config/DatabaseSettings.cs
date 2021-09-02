@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace MailScheduler.Config
 {
-    public interface IAppSettings
+    public class DatabaseSettings : IDatabaseSettings
     {
-        public DatabaseSettings Database { get; set; }
-        public MailSettings MailSettings { get; set; }
+        public string ConnectionUrl { get; set; }
+        public string Name { get; set; }
     }
 }

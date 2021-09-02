@@ -45,11 +45,12 @@ namespace MailScheduler
                 MigrationStrategy = new MigrateMongoMigrationStrategy(),
                 BackupStrategy = new CollectionMongoBackupStrategy(),
             };
+
             services.AddHangfire(config =>
             {
-                var connectionString = configSection.GetSection("MongoConnectionString").Value;
-                var databaseName = configSection.GetSection("MongoDatabaseName").Value;
-                 
+                var connectionString = configSection.GetSection("Database").GetSection("ConnectionUrl").Value;
+                var databaseName = configSection.GetSection("Database").GetSection("Name").Value;
+
                 config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
                 config.UseSimpleAssemblyNameTypeSerializer();
                 config.UseRecommendedSerializerSettings();
@@ -84,7 +85,8 @@ namespace MailScheduler
                 //Authorization = new[] { }
             });
 
-            RecurringJob.AddOrUpdate<IMailerService>(x => x.AssessAndSendMail(), "0 10 * * *");
+            // TODO: Move CRON to constant file (TOTODO: Make CRON adjustable from LimeSurvey)
+            RecurringJob.AddOrUpdate<IMailerService>(x => x.AssessAndSendMail(), "30 * * * *");
         }
     }
 }
