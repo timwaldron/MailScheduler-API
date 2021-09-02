@@ -75,6 +75,8 @@ The team at Novar Specialist Healthcare
 
         public void AssessAndSendMail()
         {
+            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Assessing and sending mail...");
+
             try
             {
                 var allSchedules = _service.GetAllSchedules();
@@ -88,7 +90,7 @@ The team at Novar Specialist Healthcare
                     {
                         if (followupDate == date)
                         {
-                            Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}] Matched scheduled survey: {schedule.FirstName} {schedule.LastName} ({schedule.Email}) for date {followupDate}.");
+                            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Matched scheduled survey: {schedule.FirstName} {schedule.LastName} ({schedule.Email}) for date {followupDate}.");
                             //SendMail(schedule);
                             break; //
                         }

@@ -35,6 +35,8 @@ namespace MailScheduler.Controllers
         [HttpPost("init")]
         public IActionResult InitUserSchedule([FromBody] UserScheduleDto dto)
         {
+            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Creating initial user: {dto.FirstName} {dto.LastName} ({dto.Email})");
+
             var id = _service.InitUserSchedule(dto);
             
             // TODO: Assess if we need to return anything
