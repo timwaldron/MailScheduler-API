@@ -37,7 +37,14 @@ namespace MailScheduler.Services
                 mail.From = new MailAddress(_settings.MailSettings.FromAddress);
                 mail.Subject = "Novar Survey";
 
-                var surveyURL = _settings.MailSettings.BaseSurveyUrl.Replace("{SID}", user.SurveyId);
+                // Build URL from user data
+                var surveyURL = _settings.MailSettings.BaseSurveyUrl
+                    .Replace("{SID}", "742391") // TODO: Assess if we can hardcode this
+                    .Replace("{FIRSTNAME}", user.FirstName)
+                    .Replace("{LASTNAME}", user.LastName)
+                    .Replace("{EMAIL}", user.Email)
+                    .Replace("{TOKEN}", user.Token)
+                    .Replace("{INJURYTYPE}", user.InjuryType);
 
                 mail.To.Add(user.Email);
                 string body = @"
@@ -52,7 +59,7 @@ If you need any assistance with this survey or if you have any enquiries in rega
 
 You can call us on [need phone number] or email us at [need email address] 
 
-Your next scheduled email is on: X
+Your next scheduled email is on: X (TO BE FILLED IN)
 
 With Best Regards
 
