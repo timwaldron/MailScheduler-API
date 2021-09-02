@@ -42,8 +42,8 @@ namespace MailScheduler
             // Hangfire Background Jobs
             var migrationOptions = new MongoMigrationOptions
             {
-                MigrationStrategy = new MigrateMongoMigrationStrategy(),
-                BackupStrategy = new CollectionMongoBackupStrategy(),
+                MigrationStrategy = new DropMongoMigrationStrategy(),
+                BackupStrategy = new NoneMongoBackupStrategy(),
             };
 
             services.AddHangfire(config =>
