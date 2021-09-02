@@ -1,7 +1,5 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
-
-# Bash scripts
-/mfwd_ui-start.sh
+./docker-compose.yml
 
 # compiled output
 **/dist
