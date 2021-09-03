@@ -19,7 +19,13 @@ namespace MailScheduler.Repositories
 
         public RepositoryBase(IAppSettings settings)
         {
-            var client = new MongoClient(settings.Database.ConnectionUrl);
+            var clientSettings = new MongoClientSettings
+            {
+                Credential = MongoCredential.CreateCredential(settings.Database.AdminDb, settings.Database.AdminUsername, settings.Database.AdminPassword),
+                Server = new MongoServerAddress(settings.Database.ServerUrl, 27017), // TODO: Add port into db settins, shouldn't really matter.
+            };
+
+            var client = new MongoClient(clientSettings);
             var database = client.GetDatabase(settings.Database.Name);
 
             var conventionPack = new ConventionPack { new CamelCaseElementNameConvention() };

@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using System;
 
 namespace MailScheduler
@@ -46,15 +47,25 @@ namespace MailScheduler
                 BackupStrategy = new NoneMongoBackupStrategy(),
             };
 
+            var adminDb = configSection.GetSection("Database").GetSection("AdminDb").Value;
+            var adminUsername = configSection.GetSection("Database").GetSection("AdminUsername").Value;
+            var adminPassword = configSection.GetSection("Database").GetSection("AdminPassword").Value;
+            var serverUrl = configSection.GetSection("Database").GetSection("ServerUrl").Value;
+
+            var databaseName = configSection.GetSection("Database").GetSection("Name").Value;
+
+            var mongoClientSettings = new MongoClientSettings
+            {
+                Credential = MongoCredential.CreateCredential(adminDb, adminUsername, adminPassword),
+                Server = new MongoServerAddress(serverUrl, 27017), // TODO: Add port into db settins, shouldn't really matter.
+            };
+
             services.AddHangfire(config =>
             {
-                var connectionString = configSection.GetSection("Database").GetSection("ConnectionUrl").Value;
-                var databaseName = configSection.GetSection("Database").GetSection("Name").Value;
-
                 config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
                 config.UseSimpleAssemblyNameTypeSerializer();
                 config.UseRecommendedSerializerSettings();
-                config.UseMongoStorage(connectionString, databaseName, new MongoStorageOptions { MigrationOptions = migrationOptions });
+                config.UseMongoStorage(mongoClientSettings, databaseName, new MongoStorageOptions { MigrationOptions = migrationOptions });
             });
             services.AddHangfireServer();
 
