@@ -96,8 +96,8 @@ namespace MailScheduler
                 //Authorization = new[] { }
             });
 
-            // TODO: Move CRON to constant file (TOTODO: Make CRON adjustable from LimeSurvey)
-            RecurringJob.AddOrUpdate<IMailerService>(x => x.AssessAndSendMail(), "30 * * * *");
+            // TODO: Move CRON to constant file (TO-TODO: Make CRON adjustable from LimeSurvey)
+            RecurringJob.AddOrUpdate<IMailerService>(x => x.AssessAndSendMail(), "*/5 * * * *");
         }
     }
 }
