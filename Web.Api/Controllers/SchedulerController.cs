@@ -35,12 +35,18 @@ namespace MailScheduler.Controllers
         [HttpPost("init")]
         public IActionResult InitUserSchedule([FromBody] UserScheduleDto dto)
         {
-            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Creating initial user: {dto.FirstName} {dto.LastName} ({dto.Email})");
+            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] User started registration survey: {dto.FirstName} {dto.LastName} ({dto.Email})");
 
             var id = _service.InitUserSchedule(dto);
-            
-            // TODO: Assess if we need to return anything
-            return Ok(string.IsNullOrEmpty(id) ? "No user created" : id);
+
+            if (string.IsNullOrEmpty(id))
+            {
+                Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] User already found in scheduling system");
+                return Ok("No user created");
+            }
+
+            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Initialised new user {dto.FirstName} {dto.LastName} ({dto.Email}) - Internal Id: {id}");
+            return Ok(id);
         }
 
         [HttpGet("{surveyId}")]

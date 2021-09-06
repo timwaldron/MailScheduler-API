@@ -97,9 +97,9 @@ The team at Novar Specialist Healthcare
                     {
                         if (followupDate == date)
                         {
-                            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Matched scheduled survey: {schedule.FirstName} {schedule.LastName} ({schedule.Email}) for date {followupDate}.");
-                            //SendMail(schedule);
-                            break; //
+                            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Sending mail: {schedule.FirstName} {schedule.LastName} ({schedule.Email}) for date {followupDate}.");
+                            SendMail(schedule);
+                            break;
                         }
                     }
                 }
