@@ -1,4 +1,5 @@
-﻿using MailScheduler.Models;
+﻿using MailScheduler.Helpers;
+using MailScheduler.Models;
 using MailScheduler.Models.Dtos;
 using MailScheduler.Repositories;
 using System;

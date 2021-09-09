@@ -20,12 +20,11 @@ namespace MailScheduler.Controllers
             _service = service;
         }
 
-        [HttpPost("mailtest")]
-        public IActionResult MailTest([FromBody] UserScheduleDto dto)
+        [HttpPost("mailtest/{followupDate}")]
+        public IActionResult MailTest([FromBody] UserScheduleDto dto, string followupDate)
         {
             Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Dev mailtest: {dto.FirstName} {dto.LastName} ({dto.Email})");
-            var mailResponse = _service.SendMail(dto);
-
+            var mailResponse = _service.SendMail(dto, followupDate);
             return Ok(mailResponse);
         }
     }

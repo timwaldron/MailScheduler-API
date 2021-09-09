@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MailScheduler.Models
+namespace MailScheduler.Helpers
 {
     public static class Constants
     {

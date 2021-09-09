@@ -8,7 +8,7 @@ namespace MailScheduler.Services
 {
     public interface IMailerService
     {
-        string SendMail(UserScheduleDto user);
+        string SendMail(UserScheduleDto user, string timepoint);
         void AssessAndSendMail();
     }
 }

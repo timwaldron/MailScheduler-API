@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using MailScheduler.Config;
+using MailScheduler.Helpers;
 using MailScheduler.Models;
 using MailScheduler.Models.Dtos;
 using System;
@@ -21,9 +22,10 @@ namespace MailScheduler.Services
             _service = service;
         }
 
-        public string SendMail(UserScheduleDto user)
+        public string SendMail(UserScheduleDto user, string followupDate)
         {
             string response = string.Empty;
+            string entrySurveyId = "742391"; // TODO: Put this as "entrySurveyId" in the global plugin settings (stored in db)
 
             try
             {
@@ -35,39 +37,29 @@ namespace MailScheduler.Services
                 smtpServer.Credentials = new System.Net.NetworkCredential(_settings.MailSettings.Username, _settings.MailSettings.Password);
 
                 mail.From = new MailAddress(_settings.MailSettings.FromAddress);
-                mail.Subject = "Novar Survey";
+                mail.Subject = "Post Surgery Survey"; // TODO: Make this configurable in global plugin settings?
+
+                mail.To.Add(user.Email);
 
                 // Build URL from user data
                 var surveyURL = _settings.MailSettings.BaseSurveyUrl
-                    .Replace("{SID}", "742391") // TODO: Assess if we can hardcode this
+                    .Replace("{SID}", entrySurveyId)
                     .Replace("{FIRSTNAME}", user.FirstName)
                     .Replace("{LASTNAME}", user.LastName)
                     .Replace("{EMAIL}", user.Email)
                     .Replace("{TOKEN}", user.Token)
                     .Replace("{INJURYTYPE}", user.InjuryType);
 
-                mail.To.Add(user.Email);
-                string body = @"
-Dear {NAME},
+                var surgeryType = InjuryTypeToSurgeryType(user.InjuryType);
+                var timepoint = TimepointToString(user.SurgeryDate, followupDate);
 
-To participate, please click on the link below.
-
-Survey Link: 
-{SURVEYURL}
-
-If you need any assistance with this survey or if you have any enquiries in regard to the same, please do not hesitate to contact us.
-
-You can call us on [need phone number] or email us at [need email address] 
-
-Your next scheduled email is on: X (TO BE FILLED IN)
-
-With Best Regards
-
-The team at Novar Specialist Healthcare
-";
-
-                mail.Body = body
-                    .Replace("{NAME}", $"{user.FirstName} {user.LastName}")
+                //Replace any fields in the email html template
+                mail.IsBodyHtml = true;
+                mail.Body = Templates.EmailHTML
+                    .Replace("{FIRSTNAME}", user.FirstName)
+                    .Replace("{LASTNAME}", user.LastName)
+                    .Replace("{TIMEPOINT}", timepoint)
+                    .Replace("{SURGERYTYPE}", surgeryType)
                     .Replace("{SURVEYURL}", $"{surveyURL}");
 
                 smtpServer.Send(mail);
@@ -78,6 +70,40 @@ The team at Novar Specialist Healthcare
             }
 
             return response;
+        }
+
+        private string InjuryTypeToSurgeryType(string injuryType)
+        {
+            // This text is just temporary, need to replace
+            return injuryType switch
+            {
+                "H" => "Hip",
+                "KN" => "Knee Non-Arthritis",
+                "KA" => "Knee Arthroplasty",
+                "SA" => "Shoulder Arthroplasty",
+                "SI" => "Shoulder Instability",
+                _ => "(Unknown Surgery Type, please contact us)",
+            };
+        }
+
+        // TODO: Refactor this logic so it isn't static
+        private string TimepointToString(string surgery, string followup)
+        {
+            var surgeryDate = DateTime.Parse(surgery);
+            var followupDate = DateTime.Parse(followup);
+            var difference = (followupDate - surgeryDate).TotalDays - 2; // Minus 2 days just to make sure it's within the followup bracket
+
+            switch (difference)
+            {
+                case <= 42: return "six weeks";
+                case <= 90: return "three months";
+                case <= 180: return "six months";
+                case <= 365: return "twelve months";
+                case <= 730: return "two years";
+                case <= 1825: return "five years";
+                case <= 3650: return "ten years";
+                default: return "(Unknown Timepoint, please contact us)";
+            }
         }
 
         public void AssessAndSendMail()
@@ -92,13 +118,12 @@ The team at Novar Specialist Healthcare
                 // Iterate every schedule
                 foreach (var schedule in allSchedules)
                 {
-
                     foreach (var followupDate in schedule.FollowupDates)
                     {
                         if (followupDate == date)
                         {
                             Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Sending mail: {schedule.FirstName} {schedule.LastName} ({schedule.Email}) for date {followupDate}.");
-                            SendMail(schedule);
+                            SendMail(schedule, followupDate);
                             break;
                         }
                     }
