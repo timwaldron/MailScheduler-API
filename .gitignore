@@ -503,6 +503,4 @@ $RECYCLE.BIN/
 !.vscode/launch.json
 !.vscode/extensions.json
 /Web.Api/appsettings.Development.json
-/Web.Api/appsettings.json
-docker-compose.yml
 **/Templates.cs
