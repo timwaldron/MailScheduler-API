@@ -505,3 +505,4 @@ $RECYCLE.BIN/
 /Web.Api/appsettings.Development.json
 /Web.Api/appsettings.json
 docker-compose.yml
+**/Templates.cs
