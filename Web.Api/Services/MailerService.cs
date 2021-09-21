@@ -16,11 +16,13 @@ namespace MailScheduler.Services
     {
         private readonly IAppSettings _settings;
         private readonly ISchedulerRepository _schedulerRepository;
+        private readonly ITelemetryService _telemetryService;
 
-        public MailerService(IAppSettings settings, ISchedulerRepository schedulerRepository)
+        public MailerService(IAppSettings settings, ISchedulerRepository schedulerRepository, ITelemetryService telemetryService)
         {
             _settings = settings;
             _schedulerRepository = schedulerRepository;
+            _telemetryService = telemetryService;
         }
 
         public async Task<string> SendMail(UserScheduleDto user, string followupDate)
@@ -67,6 +69,7 @@ namespace MailScheduler.Services
             }
             catch (Exception ex)
             {
+                await _telemetryService.Log($"[{DateTime.Now.ToLongTimeString()}] Failure sending mail for {user.Id} @ {user.Token} / {user.SurveyId}: {ex.Message}", Severity.Error);
                 response = ex.ToString();
             }
 
@@ -107,7 +110,7 @@ namespace MailScheduler.Services
 
         public async Task AssessAndSendMail()
         {
-            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Assessing and sending mail...");
+            await _telemetryService.Log($"[{DateTime.Now.ToLongTimeString()}] Assessing and sending mail...");
 
             try
             {
@@ -121,16 +124,16 @@ namespace MailScheduler.Services
                     {
                         if (followupDate == date)
                         {
-                            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Sending mail: {schedule.FirstName} {schedule.LastName} ({schedule.Email}) for date {followupDate}.");
+                            await _telemetryService.Log($"[{DateTime.Now.ToLongTimeString()}] Sending mail {schedule.Id} @ {schedule.Token} / {schedule.SurveyId}");
                             await SendMail(schedule, followupDate);
                             break;
                         }
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // TODO: HANDLE / IMPLEMENT THIS CORRECTLY
+                await _telemetryService.Log($"[{DateTime.Now.ToLongTimeString()}] Failure within AssessAndSendMail: {ex.Message}", Severity.Error);
             }
         }
     }

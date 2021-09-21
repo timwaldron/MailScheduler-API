@@ -14,10 +14,12 @@ namespace MailScheduler.Controllers
     public class SchedulerController : ControllerBase
     {
         private readonly ISchedulerService _service;
+        private readonly ITelemetryService _telemetryService;
 
-        public SchedulerController(ISchedulerService service)
+        public SchedulerController(ISchedulerService service, ITelemetryService telemetryService)
         {
             _service = service;
+            _telemetryService = telemetryService;
         }
 
         [HttpPost]
@@ -31,17 +33,17 @@ namespace MailScheduler.Controllers
         [HttpPost("init")]
         public async Task<IActionResult> InitUserSchedule([FromBody] UserScheduleDto dto)
         {
-            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] User started registration survey: {dto.FirstName} {dto.LastName} ({dto.Email})");
+            await _telemetryService.Log($"[{DateTime.Now.ToLongTimeString()}] User started registration survey: {dto.Token}");
 
             var id = await _service.InitUserSchedule(dto);
 
             if (string.IsNullOrEmpty(id))
             {
-                Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] User already found in scheduling system");
+                await _telemetryService.Log($"[{DateTime.Now.ToLongTimeString()}] User already found in scheduling system ({dto.Token} / {dto.SurveyId})");
                 return Ok("No user created");
             }
 
-            Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Initialised new user {dto.FirstName} {dto.LastName} ({dto.Email}) - Internal Id: {id}");
+            await _telemetryService.Log($"[{DateTime.Now.ToLongTimeString()}] Initialised new user ({dto.Token} / {dto.SurveyId})");
             return Ok(id);
         }
 
