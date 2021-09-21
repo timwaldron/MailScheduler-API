@@ -8,8 +8,8 @@ namespace MailScheduler.Repositories
 {
     public interface ISchedulerRepository
     {
-        UserScheduleDto GetScheduleByToken(string surveyId, string token);
-        string SaveUserSchedule(UserScheduleDto dto);
-        List<UserScheduleDto> GetAllSchedules();
+        Task<UserScheduleDto> GetScheduleByToken(string surveyId, string token);
+        Task<string> SaveUserSchedule(UserScheduleDto dto);
+        Task<List<UserScheduleDto>> GetAllSchedules();
     }
 }

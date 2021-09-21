@@ -3,6 +3,7 @@ using MailScheduler.Config;
 using MailScheduler.Helpers;
 using MailScheduler.Models;
 using MailScheduler.Models.Dtos;
+using MailScheduler.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,15 +15,15 @@ namespace MailScheduler.Services
     public class MailerService : IMailerService
     {
         private readonly IAppSettings _settings;
-        private readonly ISchedulerService _service;
+        private readonly ISchedulerRepository _schedulerRepository;
 
-        public MailerService(IAppSettings settings, ISchedulerService service)
+        public MailerService(IAppSettings settings, ISchedulerRepository schedulerRepository)
         {
             _settings = settings;
-            _service = service;
+            _schedulerRepository = schedulerRepository;
         }
 
-        public string SendMail(UserScheduleDto user, string followupDate)
+        public async Task<string> SendMail(UserScheduleDto user, string followupDate)
         {
             string response = string.Empty;
             string entrySurveyId = "742391"; // TODO: Put this as "entrySurveyId" in the global plugin settings (stored in db)
@@ -37,7 +38,7 @@ namespace MailScheduler.Services
                 smtpServer.Credentials = new System.Net.NetworkCredential(_settings.MailSettings.Username, _settings.MailSettings.Password);
 
                 mail.From = new MailAddress(_settings.MailSettings.FromAddress);
-                mail.Subject = "Post Surgery Survey"; // TODO: Make this configurable in global plugin settings?
+                mail.Subject = "Post-Operative Survey"; // TODO: Make this configurable in global plugin settings?
 
                 mail.To.Add(user.Email);
 
@@ -62,7 +63,7 @@ namespace MailScheduler.Services
                     .Replace("{SURGERYTYPE}", surgeryType)
                     .Replace("{SURVEYURL}", $"{surveyURL}");
 
-                smtpServer.Send(mail);
+                await smtpServer.SendMailAsync(mail);
             }
             catch (Exception ex)
             {
@@ -77,11 +78,9 @@ namespace MailScheduler.Services
             // This text is just temporary, need to replace
             return injuryType switch
             {
-                "H" => "Hip",
-                "KN" => "Knee Non-Arthritis",
-                "KA" => "Knee Arthroplasty",
-                "SA" => "Shoulder Arthroplasty",
-                "SI" => "Shoulder Instability",
+                "H" => "hip",
+                var injury when injury == "KN" || injury == "KA" => "knee",
+                var injury when injury == "SA" || injury == "SI" => "shoulder",
                 _ => "(Unknown Surgery Type, please contact us)",
             };
         }
@@ -106,13 +105,13 @@ namespace MailScheduler.Services
             }
         }
 
-        public void AssessAndSendMail()
+        public async Task AssessAndSendMail()
         {
             Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Assessing and sending mail...");
 
             try
             {
-                var allSchedules = _service.GetAllSchedules();
+                var allSchedules = await _schedulerRepository.GetAllSchedules();
                 var date = DateTime.Now.ToString(Constants.DATETIME_FORMAT);
 
                 // Iterate every schedule
@@ -123,7 +122,7 @@ namespace MailScheduler.Services
                         if (followupDate == date)
                         {
                             Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] Sending mail: {schedule.FirstName} {schedule.LastName} ({schedule.Email}) for date {followupDate}.");
-                            SendMail(schedule, followupDate);
+                            await SendMail(schedule, followupDate);
                             break;
                         }
                     }

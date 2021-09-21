@@ -13,31 +13,27 @@ namespace MailScheduler.Controllers
     [Route("[controller]")]
     public class SchedulerController : ControllerBase
     {
-        private readonly ILogger<SchedulerController> _logger;
         private readonly ISchedulerService _service;
 
-        public SchedulerController(
-            ILogger<SchedulerController> logger,
-            ISchedulerService service)
+        public SchedulerController(ISchedulerService service)
         {
-            _logger = logger;
             _service = service;
         }
 
         [HttpPost]
-        public IActionResult SaveUserSchedule([FromBody] UserScheduleDto dto)
+        public async Task<IActionResult> SaveUserSchedule([FromBody] UserScheduleDto dto)
         {
-            var id = _service.SaveUserSchedule(dto);
+            var id = await _service.SaveUserSchedule(dto);
 
             return Ok(id);
         }
 
         [HttpPost("init")]
-        public IActionResult InitUserSchedule([FromBody] UserScheduleDto dto)
+        public async Task<IActionResult> InitUserSchedule([FromBody] UserScheduleDto dto)
         {
             Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] User started registration survey: {dto.FirstName} {dto.LastName} ({dto.Email})");
 
-            var id = _service.InitUserSchedule(dto);
+            var id = await _service.InitUserSchedule(dto);
 
             if (string.IsNullOrEmpty(id))
             {
@@ -50,11 +46,19 @@ namespace MailScheduler.Controllers
         }
 
         [HttpGet("{surveyId}")]
-        public UserScheduleDto GetScheduleByToken(string surveyId, string token)
+        public async Task<UserScheduleDto> GetScheduleByToken(string surveyId, string token)
         {
-            var response = _service.GetScheduleByToken(surveyId, token);
+            var response = await _service.GetScheduleByToken(surveyId, token);
 
             return response;
+        }
+
+        [HttpGet("mailtest/{followupDate}")]
+        public async Task<IActionResult> MailTest(string followupDate, string token, string surveyId)
+        {
+            await _service.DebugMailTest(followupDate, token, surveyId);
+
+            return Ok();
         }
     }
 }

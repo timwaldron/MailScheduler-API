@@ -36,11 +36,15 @@ namespace MailScheduler
             // Services
             services.AddScoped<ISchedulerService, SchedulerService>();
             services.AddScoped<IMailerService, MailerService>();
+            services.AddScoped<ITelemetryService, TelemetryService>();
 
             // Repositories
             services.AddScoped<ISchedulerRepository, SchedulerRepository>();
+            services.AddScoped<ITelemetryRepository, TelemetryRepository>();
 
-            // Hangfire Background Jobs
+            /*
+             * Hangfire Background Jobs
+             */
             var migrationOptions = new MongoMigrationOptions
             {
                 MigrationStrategy = new DropMongoMigrationStrategy(),
@@ -97,7 +101,7 @@ namespace MailScheduler
             });
 
             // TODO: Move CRON to constant file (TO-TODO: Make CRON adjustable from LimeSurvey)
-            RecurringJob.AddOrUpdate<IMailerService>(x => x.AssessAndSendMail(), "*/5 * * * *");
+            RecurringJob.AddOrUpdate<IMailerService>(x => x.AssessAndSendMail(), "0 10 * * *");
         }
     }
 }

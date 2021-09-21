@@ -19,37 +19,30 @@ namespace MailScheduler.Repositories
         {
         }
 
-        public UserScheduleDto GetScheduleByToken(string surveyId, string token)
+        public async Task<UserScheduleDto> GetScheduleByToken(string surveyId, string token)
         {
             var surveyFilter = Builders<UserSchedule>.Filter.Eq(d => d.SurveyId, surveyId);
             var tokenFilter = Builders<UserSchedule>.Filter.Eq(d => d.Token, token);
 
             var filter = Builders<UserSchedule>.Filter.And(surveyFilter, tokenFilter);
             
-            var response = base.FindByQuery(filter)?.FirstOrDefault();
+            var response = (await FindByQuery(filter))?.FirstOrDefault();
 
             return response?.ToDto();
         }
 
-        public string SaveUserSchedule(UserScheduleDto dto)
+        public async Task<string> SaveUserSchedule(UserScheduleDto dto)
         {
             var entity = dto.ToEntity();
-            
-            if (string.IsNullOrEmpty(entity.Id))
-            {
-                var existingUser = GetScheduleByToken(dto.SurveyId, dto.Token);
+            var response = await Upsert(entity);
 
-                entity.Id = existingUser?.Id ?? ObjectId.GenerateNewId().ToString();
-            }
-
-            var filter = Builders<UserSchedule>.Filter.Where(d => d.Id == entity.Id);
-
-            return base.UpsertDocument(filter, entity) ?? entity.Id;
+            // TODO: ASSESS CODE
+            return response?.Id ?? entity.Id;
         }
 
-        public List<UserScheduleDto> GetAllSchedules()
+        public async Task<List<UserScheduleDto>> GetAllSchedules()
         {
-            var entites = base.FindAll();
+            var entites = await GetAll();
 
             return entites.Select(e => e.ToDto()).ToList();
         }

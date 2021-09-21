@@ -8,11 +8,12 @@ namespace MailScheduler.Services
 {
     public interface ISchedulerService
     {
-        UserScheduleDto GetScheduleByToken(string surveyId, string token);
+        Task<UserScheduleDto> GetScheduleByToken(string surveyId, string token);
 
         // TODO: Return ServiceResult? (If failed/successful / if failed then why?)
-        string SaveUserSchedule(UserScheduleDto dto);
-        string InitUserSchedule(UserScheduleDto dto);
-        List<UserScheduleDto> GetAllSchedules();
+        Task<string> SaveUserSchedule(UserScheduleDto dto);
+        Task<string> InitUserSchedule(UserScheduleDto dto);
+        Task<List<UserScheduleDto>> GetAllSchedules();
+        Task DebugMailTest(string followupDate, string token, string surveyId);
     }
 }

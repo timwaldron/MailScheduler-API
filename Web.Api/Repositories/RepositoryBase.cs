@@ -1,13 +1,9 @@
 ﻿using MailScheduler.Config;
-using MailScheduler.Models.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace MailScheduler.Repositories
@@ -34,31 +30,52 @@ namespace MailScheduler.Repositories
             _items = database.GetCollection<T>(CollectionName);
         }
 
-        public T GetById(string id)
+        public async Task<T> GetById(string id)
         {
             var filter = Builders<T>.Filter.Eq("Id", id);
-            var result = _items.Find(filter).FirstOrDefault();
+            var result = (await _items.FindAsync(filter)).FirstOrDefault();
 
             return result;
         }
 
-        public List<T> FindByQuery(FilterDefinition<T> filter)
+        public async Task<List<T>> FindByQuery(FilterDefinition<T> filter)
         {
-            var result = _items.Find(filter).ToList();
+            var result = (await _items.FindAsync(filter)).ToList();
             return result;
         }
 
-        public List<T> FindAll()
+        public async Task<List<T>> GetAll()
         {
-            var result = _items.Find(_ => true).ToList();
+            var result = (await _items.FindAsync(_ => true)).ToList();
             return result;
         }
 
-        // Create document if it doesn't exist, overwrite it if it does exist
-        public string UpsertDocument(FilterDefinition<T> filter, T entity)
+        /// <summary>
+        /// Upsert a document to the database
+        /// </summary>
+        /// <param name="entity">A document to create or update</param>
+        /// <param name="filter">Will only update if the filter matches an existing document</param>
+        /// <returns>T</returns>
+        public async Task<T> Upsert(T entity, FilterDefinition<T> filter = null)
         {
-            var result = _items.ReplaceOne(filter, entity, new ReplaceOptions() { IsUpsert = true });
-            return result.UpsertedId?.ToString();
+            var id = entity.GetType().GetProperty("Id").GetValue(entity, null);
+
+            if (id == null)
+            {
+                await _items.InsertOneAsync(entity);
+            }
+            else
+            {
+                var filterDefinition = Builders<T>.Filter.And(Builders<T>.Filter.Eq("Id", id));
+                if (filter != null)
+                {
+                    filterDefinition &= filter;
+                }
+
+                await _items.FindOneAndReplaceAsync(filterDefinition, entity);
+            }
+            
+            return entity;
         }
     }
 }

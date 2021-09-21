@@ -12,19 +12,28 @@ namespace MailScheduler.Services
     public class SchedulerService : ISchedulerService
     {
         private readonly ISchedulerRepository _repository;
+        private readonly IMailerService _mailerService;
 
-        public SchedulerService(ISchedulerRepository repository)
+        public SchedulerService(ISchedulerRepository repository, IMailerService mailerService)
         {
             _repository = repository;
+            _mailerService = mailerService;
         }
 
-        public UserScheduleDto GetScheduleByToken(string surveyId, string token)
+        public async Task<UserScheduleDto> GetScheduleByToken(string surveyId, string token)
         {
-            return _repository.GetScheduleByToken(surveyId, token);
+            return await _repository.GetScheduleByToken(surveyId, token);
         }
 
-        public string SaveUserSchedule(UserScheduleDto dto)
+        public async Task<string> SaveUserSchedule(UserScheduleDto dto)
         {
+            // Check if current user exists by surveyId/token
+            var existingUser = await GetScheduleByToken(dto.SurveyId, dto.Token);
+            if (existingUser != null)
+            {
+                dto.Id = existingUser.Id;
+            }
+
             // Recruitment date is required, should be set automatically when adding a participant.
             var recruitmentDate = DateTime.Parse(dto.RecruitmentDate);
 
@@ -40,14 +49,14 @@ namespace MailScheduler.Services
                 dto.FollowupDates = GenerateFollowupDates(surgeryDate);
             }
 
-            return _repository.SaveUserSchedule(dto);
+            return await _repository.SaveUserSchedule(dto);
         }
 
-        public string InitUserSchedule(UserScheduleDto dto)
+        public async Task<string> InitUserSchedule(UserScheduleDto dto)
         {
             // Filter lookup (Email && Token && SurveyId)
             // If user exists, return (do nothing)
-            var user = _repository.GetScheduleByToken(dto.SurveyId, dto.Token);
+            var user = await _repository.GetScheduleByToken(dto.SurveyId, dto.Token);
 
             // Returning user, no need to create initial db entry
             if (user != null)
@@ -67,12 +76,12 @@ namespace MailScheduler.Services
                 dto.SurgeryDate = surgeryDate.ToString(Constants.DATETIME_FORMAT);
             }
 
-            return _repository.SaveUserSchedule(dto);
+            return await _repository.SaveUserSchedule(dto);
         }
 
-        public List<UserScheduleDto> GetAllSchedules()
+        public async Task<List<UserScheduleDto>> GetAllSchedules()
         {
-            return _repository.GetAllSchedules();
+            return await _repository.GetAllSchedules();
         }
 
         // Static dates for now, possibly expand in the future to be set via LimeSurvey?
@@ -96,6 +105,13 @@ namespace MailScheduler.Services
             }
 
             return followups;
+        }
+
+        public async Task DebugMailTest(string followupDate, string token, string surveyId)
+        {
+            var schedule = await GetScheduleByToken(surveyId, token);
+
+            await _mailerService.SendMail(schedule, followupDate);
         }
     }
 }
