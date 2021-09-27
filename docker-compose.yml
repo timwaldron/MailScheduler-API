@@ -9,6 +9,8 @@ services:
       context: .
       dockerfile: ./Web.Api/Dockerfile
     restart: always
+    environment: 
+      - TZ=Australia/Melbourne
 
   mongo:
     container_name: mongo

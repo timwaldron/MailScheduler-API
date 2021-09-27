@@ -51,7 +51,8 @@ namespace MailScheduler.Services
                     .Replace("{LASTNAME}", user.LastName)
                     .Replace("{EMAIL}", user.Email)
                     .Replace("{TOKEN}", user.Token)
-                    .Replace("{INJURYTYPE}", user.InjuryType);
+                    .Replace("{INJURYTYPE}", user.InjuryType)
+                    .Replace("{SURGERYDATE}", user.SurgeryDate);
 
                 var surgeryType = InjuryTypeToSurgeryType(user.InjuryType);
                 var timepoint = TimepointToString(user.SurgeryDate, followupDate);
