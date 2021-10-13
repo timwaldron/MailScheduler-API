@@ -20,9 +20,7 @@ namespace MailScheduler.Models.Entities
         public string Token { get; set; }
         public string SurveyId { get; set; }
         public string InjuryType { get; set; }
-
-        public string CreatedAt { get; set; }
-        public string UpdatedAt { get; set; }
+        public string InjurySide { get; set; } // left | right
 
         public string RecruitmentDate { get; set; } // Initial date of the user registration
         public string SurgeryDate { get; set; }

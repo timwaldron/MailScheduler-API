@@ -44,6 +44,11 @@ namespace MailScheduler.Services
 
                 mail.To.Add(user.Email);
 
+                var surgeryType = InjuryTypeToSurgeryType(user.InjuryType);
+                var timepointResponse = TimepointToString(user.SurgeryDate, followupDate);
+                var timepoint = timepointResponse.Item1;
+                var surgeryInterval = timepointResponse.Item2;
+
                 // Build URL from user data
                 var surveyURL = _settings.MailSettings.BaseSurveyUrl
                     .Replace("{SID}", entrySurveyId)
@@ -52,10 +57,9 @@ namespace MailScheduler.Services
                     .Replace("{EMAIL}", user.Email)
                     .Replace("{TOKEN}", user.Token)
                     .Replace("{INJURYTYPE}", user.InjuryType)
-                    .Replace("{SURGERYDATE}", user.SurgeryDate);
-
-                var surgeryType = InjuryTypeToSurgeryType(user.InjuryType);
-                var timepoint = TimepointToString(user.SurgeryDate, followupDate);
+                    .Replace("{SURGERYDATE}", user.SurgeryDate)
+                    .Replace("{SIDE}", user.InjurySide)
+                    .Replace("{SURVEYINTERVAL}", surgeryInterval.ToString());
 
                 //Replace any fields in the email html template
                 mail.IsBodyHtml = true;
@@ -64,7 +68,7 @@ namespace MailScheduler.Services
                     .Replace("{LASTNAME}", user.LastName)
                     .Replace("{TIMEPOINT}", timepoint)
                     .Replace("{SURGERYTYPE}", surgeryType)
-                    .Replace("{SURVEYURL}", $"{surveyURL}");
+                    .Replace("{SURVEYURL}", surveyURL);
 
                 await smtpServer.SendMailAsync(mail);
             }
@@ -90,7 +94,7 @@ namespace MailScheduler.Services
         }
 
         // TODO: Refactor this logic so it isn't static
-        private string TimepointToString(string surgery, string followup)
+        private (string, int) TimepointToString(string surgery, string followup)
         {
             var surgeryDate = DateTime.Parse(surgery);
             var followupDate = DateTime.Parse(followup);
@@ -98,14 +102,14 @@ namespace MailScheduler.Services
 
             switch (difference)
             {
-                case <= 42: return "six weeks";
-                case <= 90: return "three months";
-                case <= 180: return "six months";
-                case <= 365: return "twelve months";
-                case <= 730: return "two years";
-                case <= 1825: return "five years";
-                case <= 3650: return "ten years";
-                default: return "(Unknown Timepoint, please contact us)";
+                case <= 42: return ("six weeks", 42);
+                case <= 90: return ("three months", 90);
+                case <= 180: return ("six months", 180);
+                case <= 365: return ("twelve months", 365);
+                case <= 730: return ("two years", 730);
+                case <= 1825: return ("five years", 1825);
+                case <= 3650: return ("ten years", 3650);
+                default: return ("(Unknown Timepoint, please contact us)", -1);
             }
         }
 
