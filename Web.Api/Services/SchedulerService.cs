@@ -13,11 +13,13 @@ namespace MailScheduler.Services
     {
         private readonly ISchedulerRepository _repository;
         private readonly IMailerService _mailerService;
+        private readonly ITelemetryService _telemetryService;
 
-        public SchedulerService(ISchedulerRepository repository, IMailerService mailerService)
+        public SchedulerService(ISchedulerRepository repository, IMailerService mailerService, ITelemetryService telemetryService)
         {
             _repository = repository;
             _mailerService = mailerService;
+            _telemetryService = telemetryService;
         }
 
         public async Task<UserScheduleDto> GetScheduleByToken(string surveyId, string token)
@@ -69,7 +71,7 @@ namespace MailScheduler.Services
             // If a surgery date is supplied, calculate the followup dates
             if (!string.IsNullOrEmpty(dto.SurgeryDate))
             {
-                var surgeryDate = DateTime.Parse(dto.SurgeryDate);
+                var surgeryDate = DateTime.ParseExact(dto.SurgeryDate, "dd.MM.yyyy", null);
                 dto.FollowupDates = GenerateFollowupDates(surgeryDate);
 
                 // Date string that's coming in is formatted: dd.MM.yyyy, this reformats it to our style
@@ -112,6 +114,29 @@ namespace MailScheduler.Services
             var schedule = await GetScheduleByToken(surveyId, token);
 
             await _mailerService.SendMail(schedule, followupDate);
+        }
+
+        public async Task CleanupGhostUsers(List<UserScheduleDto> users)
+        {
+            var userTokens = users.Select(u => u.Token);
+            await _telemetryService.Log("Running cleanup on ghost users...");
+
+            var dbUsers = await _repository.GetAllSchedules();
+            var ghostUserTokens = new List<string>();
+
+            foreach (var user in dbUsers)
+            {
+                if (!userTokens.Contains(user.Token))
+                {
+                    ghostUserTokens.Add(user.Token);
+                    await _telemetryService.Log($"Removing ghost user {user.FirstName} {user.LastName} ({user.Email}/{user.Token})");
+                }
+            }
+
+            if (ghostUserTokens.Any())
+            {
+                await _repository.RemoveByToken(ghostUserTokens);
+            }
         }
     }
 }

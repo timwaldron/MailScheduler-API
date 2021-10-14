@@ -11,5 +11,6 @@ namespace MailScheduler.Repositories
         Task<UserScheduleDto> GetScheduleByToken(string surveyId, string token);
         Task<string> SaveUserSchedule(UserScheduleDto dto);
         Task<List<UserScheduleDto>> GetAllSchedules();
+        Task RemoveByToken(List<string> userTokens);
     }
 }

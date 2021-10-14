@@ -15,5 +15,6 @@ namespace MailScheduler.Services
         Task<string> InitUserSchedule(UserScheduleDto dto);
         Task<List<UserScheduleDto>> GetAllSchedules();
         Task DebugMailTest(string followupDate, string token, string surveyId);
+        Task CleanupGhostUsers(List<UserScheduleDto> users);
     }
 }

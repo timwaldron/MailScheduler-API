@@ -46,5 +46,15 @@ namespace MailScheduler.Repositories
 
             return entites.Select(e => e.ToDto()).ToList();
         }
+
+        public async Task RemoveByToken(List<string> userTokens)
+        {
+            // TODO: Refactor this logic, should be able to make 1 call to the database driver with all the tokens to remove
+            foreach (var token in userTokens)
+            {
+                var surveyFilter = Builders<UserSchedule>.Filter.Eq(d => d.Token, token);
+                await Delete(surveyFilter);
+            }
+        }
     }
 }

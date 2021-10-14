@@ -62,5 +62,12 @@ namespace MailScheduler.Controllers
 
             return Ok();
         }
+
+        [HttpPost("cleanupusers")]
+        public async Task<IActionResult> CleanupGhostUsers([FromBody] List<UserScheduleDto> users)
+        {
+            await _service.CleanupGhostUsers(users);
+            return Ok();
+        }
     }
 }

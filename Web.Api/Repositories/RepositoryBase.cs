@@ -77,5 +77,10 @@ namespace MailScheduler.Repositories
             
             return entity;
         }
+
+        public async Task Delete(FilterDefinition<T> filter = null)
+        {
+            await _items.FindOneAndDeleteAsync(filter);
+        }
     }
 }
